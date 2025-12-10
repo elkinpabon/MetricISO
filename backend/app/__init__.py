@@ -60,14 +60,26 @@ def _init_formulas():
                     nombre=formula_data['nombre'],
                     descripcion=formula_data['descripcion'],
                     formula=formula_data['formula'],
-                    unidad=formula_data['unidad']
+                    unidad=formula_data['unidad'],
+                    tipo=formula_data.get('tipo', 'General'),
+                    norma_iso=formula_data.get('norma_iso', 'ISO/IEC 9126')
                 )
                 formula.set_parametros(formula_data['parametros'])
                 db.session.add(formula)
                 count += 1
+            else:
+                # Actualizar tipo y norma_iso en fórmulas existentes
+                if formula_data.get('tipo') and existe.tipo == 'General':
+                    existe.tipo = formula_data.get('tipo', 'General')
+                    db.session.add(existe)
+                    count += 1
+                if formula_data.get('norma_iso') and existe.norma_iso == 'ISO/IEC 9126':
+                    existe.norma_iso = formula_data.get('norma_iso', 'ISO/IEC 9126')
+                    db.session.add(existe)
+                    count += 1
         
         if count > 0:
-            logger.info(f"Insertadas {count} nuevas formulas")
+            logger.info(f"Insertadas/Actualizadas {count} nuevas formulas")
         
         total = FormulaISO.query.count()
         logger.info(f"Total formulas en BD: {total}")

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, AlertCircle } from 'lucide-react';
 import { proyectoService } from '../services/api';
 
 function FormularioProyecto({ onProyectoCreado }) {
@@ -26,8 +27,16 @@ function FormularioProyecto({ onProyectoCreado }) {
 
   return (
     <div className="card">
-      <h2>Nuevo Proyecto</h2>
-      {error && <div className="error">{error}</div>}
+      <h2>
+        <Plus size={24} />
+        Nuevo Proyecto
+      </h2>
+      {error && (
+        <div className="error">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Nombre del Proyecto</label>
@@ -35,7 +44,7 @@ function FormularioProyecto({ onProyectoCreado }) {
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Mi Proyecto"
+            placeholder="Ej: Mi Aplicación Web"
             required
           />
         </div>
@@ -50,6 +59,7 @@ function FormularioProyecto({ onProyectoCreado }) {
           />
         </div>
         <button type="submit" className="btn btn-primary" disabled={loading}>
+          <Plus size={18} />
           {loading ? 'Creando...' : 'CREAR PROYECTO'}
         </button>
       </form>

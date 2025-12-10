@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, current_app
 from ..controllers.proyecto_controller import ProyectoController
 from ..controllers.formula_controller import FormulaController
+from ..controllers.reporte_controller import generar_reporte_pdf
+from flask import send_file
 
 def init_routes(app):
     """Inicializa todas las rutas"""
@@ -39,6 +41,24 @@ def init_routes(app):
         historico = HistoricoCalculo.query.filter_by(proyecto_id=id).order_by(HistoricoCalculo.fecha_calculo.desc()).all()
         return jsonify([h.to_dict() for h in historico])
     
+    @proyecto_bp.route('/<int:id>/reporte-pdf', methods=['GET'])
+    def descargar_reporte(id):
+        """Genera y descarga un reporte PDF del proyecto"""
+        pdf_buffer, error = generar_reporte_pdf(id)
+        if error:
+            return jsonify({'error': error}), 400
+        
+        from ..models import Proyecto
+        proyecto = Proyecto.query.get(id)
+        nombre_archivo = f"reporte_{proyecto.nombre.replace(' ', '_')}.pdf"
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=nombre_archivo
+        )
+    
     # Fórmulas
     @formula_bp.route('', methods=['GET'])
     def listar_formulas():
@@ -51,6 +71,10 @@ def init_routes(app):
     @formula_bp.route('/<codigo>/calcular', methods=['POST'])
     def calcular_formula(codigo):
         return formula_ctrl.calcular(codigo)
+    
+    @formula_bp.route('/<codigo>/referencias', methods=['GET'])
+    def obtener_referencias_formula(codigo):
+        return formula_ctrl.obtener_referencias(codigo)
     
     # Health check
     @app.route('/health', methods=['GET'])
